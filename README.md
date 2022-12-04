@@ -15,6 +15,9 @@ which is a [SPARQL 1.1](http://www.w3.org/TR/sparql11-overview/) server with a
 web interface, backed by the
 [Apache Jena TDB](https://jena.apache.org/documentation/tdb/) RDF triple store.
 
+The entrypoint for this image creates an empty dataset `/dracor` after starting
+the Fuseki server.
+
 ## License
 
 Different licenses apply to files added by different Docker layers:
@@ -110,14 +113,6 @@ volume `fuseki-data` as recommended above, do:
     docker stop fuseki
     docker rm fuseki
     docker run -d --name fuseki -p 3030:3030 --volumes-from fuseki-data dracor/fuseki
-
-## Create empty datasets
-
-You can create empty datasets at startup with:
-
-    docker run -d --name fuseki -p 3030:3030 -e FUSEKI_DATASET_1=mydataset -e FUSEKI_DATASET_2=otherdataset dracor/fuseki
-
-This will create 2 empty datasets: mydataset and otherdataset.
 
 ## Customizing Fuseki configuration
 
