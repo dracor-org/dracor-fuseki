@@ -1,13 +1,11 @@
 # Jena Fuseki docker image for DraCor
 
-<!--
-* Docker image: [dracor/fuseki](https://hub.docker.com/r/dracor/fuseki/)
-* Base images:  [openjdk](https://hub.docker.com/r/_/openjdk/):11-jre-slim-buster
-* Source: [Dockerfile](https://github.com/dracor-org/dracor-fuseki/blob/master/Dockerfile), [Apache Jena Fuseki](https://jena.apache.org/download/)
--->
+*This is an adaptation of the original Fuseki Dockerfile and scripts from
+https://github.com/stain/jena-docker/.*
 
-This is an adaptation of the original Fuseki Dockerfile and scripts from
-https://github.com/stain/jena-docker/.
+* Docker image: [dracor/dracor-fuseki](https://hub.docker.com/r/dracor/dracor-fuseki/)
+* Base images:  [eclipse-temurin](https://hub.docker.com/r/_/eclipse-temurin/):17-jre
+* Source: [Dockerfile](https://github.com/dracor-org/dracor-fuseki/blob/master/Dockerfile), [stain/jena-fuseki](https://github.com/stain/jena-docker/blob/master/jena-fuseki/Dockerfile), [Apache Jena Fuseki](https://jena.apache.org/download/)
 
 This is a [Docker](https://www.docker.com/) image for running
 [Apache Jena Fuseki](https://jena.apache.org/documentation/fuseki2/),
@@ -22,11 +20,11 @@ the Fuseki server.
 
 Different licenses apply to files added by different Docker layers:
 
-* dracor/fuseki [Dockerfile](https://github.com/dracor-org/dracor-fuseki/blob/master/jena-fuseki/Dockerfile): [Apache License, version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+* dracor/dracor-fuseki [Dockerfile](https://github.com/dracor-org/dracor-fuseki/blob/master/jena-fuseki/Dockerfile): [Apache License, version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 * Apache Jena (`/jena-fuseki` in the image): [Apache License, version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
   See also: `docker run dracor/fuseki cat /jena-fuseki/NOTICE`
-* OpenJDK (`/usr/local/openjdk-11/` in the image): [GPL 2.0 with Classpath exception](https://openjdk.java.net/legal/gplv2+ce.html)
-  See `/usr/local/openjdk-11/legal/` in image
+* OpenJDK (`/opt/java/openjdk/` in the image): [GPL 2.0 with Classpath exception](https://openjdk.java.net/legal/gplv2+ce.html)
+  See `/opt/java/openjdk/legal/` in image
 * Debian GNU/Linux (rest of `/`): [GPL 3](http://www.gnu.org/licenses/gpl-3.0) and [compatible licenses](https://www.debian.org/legal/licenses/), see `/usr/share/*/license` in image
 
 
@@ -129,4 +127,3 @@ and inspect `/fuseki` with the shell. Remember to restart fuseki afterwards:
 If you need to add additional JARs to the classpath, but do not want to
 modify the volume `/fuseki`, then add the JARs to
 `/fuseki-extra` which will be added as `/fuseki/extra` on start.
-
