@@ -3,8 +3,8 @@
 *This is an adaptation of the original Fuseki Dockerfile and scripts from
 https://github.com/stain/jena-docker/.*
 
-* Docker image: [dracor/dracor-fuseki](https://hub.docker.com/r/dracor/dracor-fuseki/)
-* Base images:  [eclipse-temurin](https://hub.docker.com/r/_/eclipse-temurin/):17-jre
+* Docker image: [dracor/fuseki](https://hub.docker.com/r/dracor/fuseki/)
+* Base images:  [eclipse-temurin](https://hub.docker.com/r/_/eclipse-temurin/):21-jre
 * Source: [Dockerfile](https://github.com/dracor-org/dracor-fuseki/blob/master/Dockerfile), [stain/jena-fuseki](https://github.com/stain/jena-docker/blob/master/jena-fuseki/Dockerfile), [Apache Jena Fuseki](https://jena.apache.org/download/)
 
 This is a [Docker](https://www.docker.com/) image for running
@@ -20,7 +20,7 @@ the Fuseki server.
 
 Different licenses apply to files added by different Docker layers:
 
-* dracor/dracor-fuseki [Dockerfile](https://github.com/dracor-org/dracor-fuseki/blob/master/jena-fuseki/Dockerfile): [Apache License, version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+* dracor/fuseki [Dockerfile](https://github.com/dracor-org/dracor-fuseki/blob/master/jena-fuseki/Dockerfile): [Apache License, version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 * Apache Jena (`/jena-fuseki` in the image): [Apache License, version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
   See also: `docker run dracor/fuseki cat /jena-fuseki/NOTICE`
 * OpenJDK (`/opt/java/openjdk/` in the image): [GPL 2.0 with Classpath exception](https://openjdk.java.net/legal/gplv2+ce.html)
