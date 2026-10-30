@@ -16,6 +16,11 @@ web interface, backed by the
 The entrypoint for this image creates an empty dataset `/dracor` after starting
 the Fuseki server.
 
+The SPARQL query endpoints (`/dracor/sparql`, `/dracor/query`) and read-only
+graph access (`/dracor/get`) are open to anyone. Everything that modifies data
+(`/dracor/update`, `/dracor/data`, `/dracor/upload`) and the admin endpoints
+(`/$/...`) require the `admin` user.
+
 ## License
 
 Different licenses apply to files added by different Docker layers:
@@ -129,6 +134,27 @@ volume `fuseki-data` as recommended above, do:
     docker stop fuseki
     docker rm fuseki
     docker run -d --name fuseki -p 3030:3030 --volumes-from fuseki-data dracor/fuseki
+
+### Upgrading from 1.x
+
+Version 2 of this image updates Fuseki from 4.8 to 6.2, creates `/dracor` as
+TDB2, runs as an unprivileged user and restricts write access to the graph
+store. Start it with a new, empty `/fuseki` volume and load the data again:
+
+* The Fuseki 4 volume is owned by root and cannot be written by the
+  unprivileged user.
+* `shiro.ini` is only copied to `/fuseki` on the first start, so an old
+  volume keeps the old access rules, which let anyone write to
+  `/dracor/data`.
+* Jena recommends reloading data written by older versions (language tags
+  are case-insensitive since Jena 5, and data should be reloaded into TDB2).
+
+If you nevertheless keep an old volume, fix its permissions first and add the
+`/*/data/**` and `/*/upload/**` rules from this repository's `shiro.ini` to
+`/fuseki/shiro.ini`:
+
+    docker run --rm --user 0 --volumes-from fuseki-data --entrypoint sh dracor/fuseki \
+      -c 'chown -R 1001:0 /fuseki && chmod -R g=u /fuseki'
 
 ## Customizing Fuseki configuration
 
