@@ -21,8 +21,11 @@ docker run -p 3030:3030 --user 12345:0 dracor/fuseki            # arbitrary UID 
 ```
 
 There are no tests or linters. The `docker build` itself is the smoke test: a
-build step starts `fuseki-server` and curls `/$/ping`, failing the build if
-Fuseki does not come up.
+build step starts `fuseki-server` with the datasets from `config/` and curls
+`/$/ping` and `/dracor/query`, failing the build if Fuseki does not come up or
+skips `/dracor`. Fuseki 6 exits on a configuration file with a Turtle syntax
+error, but only logs an assembler error (e.g. a dangling reference) and starts
+without that dataset, which `/$/ping` does not notice.
 
 ## How the pieces fit together
 
@@ -32,7 +35,8 @@ Fuseki does not come up.
   `FUSEKI_BASE=/fuseki`. Runs under `tini` as UID 1001 in group 0; the image
   must also work under any UID in group 0, so everything Fuseki writes in
   `/fuseki` has to stay group-writable. `/jena-fuseki` is only read at
-  runtime. The build-time ping test runs as root before `USER`.
+  runtime. The build-time test runs as root before `USER` and removes `/fuseki`
+  again, as the datasets' TDB2 locations are absolute paths in `/fuseki`.
 - **Fuseki 6** starts the "main" server with UI (`FusekiServerUICmd`); there is
   no webapp/WAR anymore. Its stricter IRI parser rejects some IRIs Fuseki 4
   accepted (e.g. `urn:g`).
@@ -54,7 +58,8 @@ Fuseki does not come up.
      `/fuseki/configuration`, overwriting older versions, so that changes to
      them, unlike `shiro.ini`, reach an existing volume.
   6. Starts the server in the background and polls `localhost:3030` until it
-     returns 200.
+     returns 200; exits with 1 if the server dies meanwhile, or if `/dracor`
+     is not available then (Fuseki skipped its configuration).
   7. Runs `chmod g=u` on its own files in `/fuseki`, because Fuseki creates
      `config.ttl` and `templates/*` with mode 600 regardless of the umask.
      Then `wait`s on the server.

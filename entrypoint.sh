@@ -55,11 +55,24 @@ cp "$FUSEKI_HOME"/configuration/*.ttl "$FUSEKI_BASE/configuration/"
 
 # fork
 exec "$@" &
+FUSEKI_PID=$!
 
-# Wait until server is up
+# Wait until server is up; Fuseki exits on a configuration it cannot parse
 while [[ $(curl -I http://localhost:3030 2>/dev/null | head -n 1 | cut -d$' ' -f2) != '200' ]]; do
+  if ! kill -0 "$FUSEKI_PID" 2>/dev/null ; then
+    echo "ERROR: Fuseki exited during startup" >&2
+    exit 1
+  fi
   sleep 1s
 done
+
+# Fuseki skips a dataset whose configuration it cannot build and runs without
+# it; DraCor is of no use without /dracor, so stop instead
+if ! curl -s --fail -o /dev/null 'http://localhost:3030/dracor/query?query=ASK%7B%7D' ; then
+  echo "ERROR: dataset /dracor is not available, see the Fuseki log above" >&2
+  kill "$FUSEKI_PID"
+  exit 1
+fi
 
 # Fuseki creates config.ttl and templates/* readable for their owner only;
 # give group 0 the same rights, so that the volume also works under another
