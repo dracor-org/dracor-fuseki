@@ -23,9 +23,9 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*
 
 # Update below according to https://jena.apache.org/download/
-# and checksum for apache-jena-fuseki-4.x.x.tar.gz.sha512
-ENV FUSEKI_SHA512 78074d87d4c022ef7e89b8394d2b14ead447a9201d52795d8c9adab0e03341cffc883abb849dab340bbecfc18654e1d126a47d8936241e8e2f036b0d66294c7d
-ENV FUSEKI_VERSION 4.8.0
+# and checksum for apache-jena-fuseki-6.x.x.tar.gz.sha512
+ENV FUSEKI_SHA512 ba65f5867d2d4741b2ed9e2af5a0d4fbb447909894ab2a0c6bc4dac8997f4fe339c87b13c48d45d054977769f0f8bf763ea346b1f7792d5cdc458041bd43a132
+ENV FUSEKI_VERSION 6.2.0
 ENV ASF_MIRROR https://www.apache.org/dyn/mirrors/mirrors.cgi?action=download&filename=
 ENV ASF_ARCHIVE https://archive.apache.org/dist/
 
@@ -54,7 +54,7 @@ RUN     (curl --location --silent --show-error --fail --retry-connrefused --retr
         tar zxf fuseki.tar.gz && \
         mv apache-jena-fuseki* $FUSEKI_HOME && \
         rm fuseki.tar.gz* && \
-        cd $FUSEKI_HOME && rm -rf fuseki.war && chmod 755 fuseki-server
+        cd $FUSEKI_HOME && chmod 755 fuseki-server
 
 # Test the install by testing it's ping resource. 20s sleep because Docker Hub.
 RUN $FUSEKI_HOME/fuseki-server & \

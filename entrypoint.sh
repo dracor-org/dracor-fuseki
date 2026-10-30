@@ -47,11 +47,12 @@ fi
 # fork
 exec "$@" &
 
+# TDB1 is deprecated since Jena 6, so TDB2 is the default
 TDB_VERSION=''
-if [ ! -z ${TDB+x} ] && [ "${TDB}" = "2" ] ; then
-  TDB_VERSION='tdb2'
-else
+if [ "${TDB}" = "1" ] ; then
   TDB_VERSION='tdb'
+else
+  TDB_VERSION='tdb2'
 fi
 
 # Wait until server is up

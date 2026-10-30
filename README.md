@@ -5,7 +5,7 @@ https://github.com/stain/jena-docker/.*
 
 * Docker image: [dracor/fuseki](https://hub.docker.com/r/dracor/fuseki/)
 * Base images:  [eclipse-temurin](https://hub.docker.com/r/_/eclipse-temurin/):21-jre
-* Source: [Dockerfile](https://github.com/dracor-org/dracor-fuseki/blob/master/Dockerfile), [stain/jena-fuseki](https://github.com/stain/jena-docker/blob/master/jena-fuseki/Dockerfile), [Apache Jena Fuseki](https://jena.apache.org/download/)
+* Source: [Dockerfile](https://github.com/dracor-org/dracor-fuseki/blob/main/Dockerfile), [stain/jena-fuseki](https://github.com/stain/jena-docker/blob/master/jena-fuseki/Dockerfile), [Apache Jena Fuseki](https://jena.apache.org/download/)
 
 This is a [Docker](https://www.docker.com/) image for running
 [Apache Jena Fuseki](https://jena.apache.org/documentation/fuseki2/),
@@ -20,7 +20,7 @@ the Fuseki server.
 
 Different licenses apply to files added by different Docker layers:
 
-* dracor/fuseki [Dockerfile](https://github.com/dracor-org/dracor-fuseki/blob/master/jena-fuseki/Dockerfile): [Apache License, version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+* dracor/fuseki [Dockerfile](https://github.com/dracor-org/dracor-fuseki/blob/main/Dockerfile): [Apache License, version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 * Apache Jena (`/jena-fuseki` in the image): [Apache License, version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
   See also: `docker run dracor/fuseki cat /jena-fuseki/NOTICE`
 * OpenJDK (`/opt/java/openjdk/` in the image): [GPL 2.0 with Classpath exception](https://openjdk.java.net/legal/gplv2+ce.html)
@@ -53,7 +53,7 @@ You can override the admin-password using the form
     docker run -p 3030:3030 -e ADMIN_PASSWORD=pw123 dracor/fuseki
 
 To specify Java settings such as the amount of memory to allocate for the
-heap (default: 1200 MiB), set the `JVM_ARGS` environment with `-e`:
+heap (default: 4 GiB), set the `JVM_ARGS` environment with `-e`:
 
     docker run -p 3030:3030 -e JVM_ARGS=-Xmx2g dracor/fuseki
 
@@ -96,11 +96,17 @@ To restart a named container (it will remember the volume and port config)
 
     docker restart fuseki
 
-### Using TDB 2
+### TDB2 and compaction
 
-To use [TDB v2](https://jena.apache.org/documentation/tdb2/) you can pass the environment variable with `-e TDB=2`
+The `/dracor` dataset uses [TDB2](https://jena.apache.org/documentation/tdb2/).
+TDB1, which is deprecated since Jena 6, can still be chosen with `-e TDB=1`:
 
-     docker run -p 3030:3030 -e TDB=2 dracor/fuseki
+     docker run -p 3030:3030 -e TDB=1 dracor/fuseki
+
+TDB2 keeps old data on disk when graphs are replaced or deleted, so the
+database keeps growing until it is compacted:
+
+    curl -u admin:$ADMIN_PASSWORD -X POST 'http://localhost:3030/$/compact/dracor?deleteOld=true'
 
 ## Upgrading Fuseki
 
