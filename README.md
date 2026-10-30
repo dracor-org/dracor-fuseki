@@ -82,6 +82,18 @@ disk space or speed requirements), specify it using `-v`:
 Note that the `/fuseki` volume must only be accessed from a single Fuseki
 container at a time.
 
+### User ID
+
+The container runs as the unprivileged user `fuseki` (UID 1001) in group 0.
+It also runs under an arbitrary user ID in group 0, as used by OpenShift/OKD,
+e.g. `docker run --user 12345:0 ...`. Everything in `/fuseki` is kept writable
+for group 0.
+
+A named or anonymous volume gets the right permissions automatically. A host
+directory mounted with `-v` must be writable for UID 1001 or for group 0:
+
+    sudo chown -R 1001:0 /ssd/data/fuseki && sudo chmod -R g=u /ssd/data/fuseki
+
 To check the logs for the container you gave `--name fuseki`, use:
 
     docker logs fuseki

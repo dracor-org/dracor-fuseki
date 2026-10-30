@@ -72,9 +72,19 @@ RUN chmod 755 /entrypoint.sh
 
 WORKDIR $FUSEKI_HOME
 
-# Make sure we start with empty /fuseki
-RUN rm -rf $FUSEKI_BASE
+# fuseki is in group 0 (root group), so that an arbitrary user ID in group 0,
+# as used by OpenShift/OKD, has the same rights as fuseki
+RUN useradd --uid 1001 --gid 0 --no-create-home --home-dir $FUSEKI_BASE fuseki
+
+# Make sure we start with empty /fuseki, writable for the fuseki user and
+# group 0, so that the image also runs under an arbitrary user ID in group 0
+RUN rm -rf $FUSEKI_BASE && \
+    mkdir $FUSEKI_BASE && \
+    chown 1001:0 $FUSEKI_BASE && \
+    chmod 775 $FUSEKI_BASE
 VOLUME $FUSEKI_BASE
+
+USER 1001:0
 
 EXPOSE 3030
 ENTRYPOINT ["/usr/bin/tini", "--", "/entrypoint.sh"]
