@@ -40,6 +40,12 @@ To build the image run:
 
     docker build -t dracor/fuseki .
 
+To test an image (needs `curl` and `jq`; further arguments are passed to
+`docker run`):
+
+    test/smoke.sh dracor/fuseki
+    test/smoke.sh dracor/fuseki --user 12345:0
+
 To try out this image, try:
 
     docker run -p 3030:3030 dracor/fuseki
