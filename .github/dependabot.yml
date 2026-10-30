@@ -21,3 +21,8 @@ updates:
     docker:
       patterns:
       - '*'
+  ignore:
+    # the major version of eclipse-temurin is the Java version, which we only
+    # update by hand to the next LTS release
+    - dependency-name: eclipse-temurin
+      update-types: ['version-update:semver-major']

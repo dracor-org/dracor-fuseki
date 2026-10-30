@@ -13,7 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM eclipse-temurin:21-jre
+# Use an LTS release of Java (Fuseki 6 needs at least Java 21)
+FROM eclipse-temurin:25-jre
 
 ENV LANG C.UTF-8
 RUN set -eux; \

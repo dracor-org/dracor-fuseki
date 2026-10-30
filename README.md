@@ -4,7 +4,7 @@
 https://github.com/stain/jena-docker/.*
 
 * Docker image: [dracor/fuseki](https://hub.docker.com/r/dracor/fuseki/)
-* Base images:  [eclipse-temurin](https://hub.docker.com/r/_/eclipse-temurin/):21-jre
+* Base images:  [eclipse-temurin](https://hub.docker.com/r/_/eclipse-temurin/):25-jre
 * Source: [Dockerfile](https://github.com/dracor-org/dracor-fuseki/blob/main/Dockerfile), [stain/jena-fuseki](https://github.com/stain/jena-docker/blob/master/jena-fuseki/Dockerfile), [Apache Jena Fuseki](https://jena.apache.org/download/)
 
 This is a [Docker](https://www.docker.com/) image for running

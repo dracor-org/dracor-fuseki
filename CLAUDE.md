@@ -73,4 +73,6 @@ Fuseki does not come up.
   release** (or manual dispatch); image tags come from the release's semver
   tag (`X.Y.Z` and `X.Y`). Pushing to `main` does not publish.
 - Actions are pinned to commit SHAs with a version comment; Dependabot updates
-  GitHub Actions and the Docker base image monthly in grouped PRs.
+  GitHub Actions monthly in grouped PRs. It ignores major versions of the
+  `eclipse-temurin` base image: its major version is the Java version, which
+  is moved by hand from LTS to LTS (25 now, next 29).
