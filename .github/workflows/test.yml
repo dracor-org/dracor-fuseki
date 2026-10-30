@@ -1,0 +1,28 @@
+name: Test Docker image
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Build and smoke test the image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # amd64 only; the release workflow builds arm64 under QEMU, which is slow
+      - name: Build image
+        run: docker build -t dracor/fuseki:test .
+
+      - name: Smoke test as the default user
+        run: test/smoke.sh dracor/fuseki:test
+
+      - name: Smoke test under an arbitrary user ID in group 0
+        run: test/smoke.sh dracor/fuseki:test --user 12345:0

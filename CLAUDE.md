@@ -18,14 +18,24 @@ docker build -t dracor/fuseki .
 docker run -p 3030:3030 -e ADMIN_PASSWORD=pw123 dracor/fuseki   # UI at http://localhost:3030/
 docker run -p 3030:3030 -e JVM_ARGS=-Xmx2g dracor/fuseki        # override heap (default 4 GiB)
 docker run -p 3030:3030 --user 12345:0 dracor/fuseki            # arbitrary UID in group 0 (OpenShift)
+test/smoke.sh dracor/fuseki                                     # smoke test an image (needs curl, jq)
+test/smoke.sh dracor/fuseki --user 12345:0                      # ... with extra `docker run` options
 ```
 
-There are no tests or linters. The `docker build` itself is the smoke test: a
-build step starts `fuseki-server` with the datasets from `config/` and curls
-`/$/ping` and `/dracor/query`, failing the build if Fuseki does not come up or
-skips `/dracor`. Fuseki 6 exits on a configuration file with a Turtle syntax
-error, but only logs an assembler error (e.g. a dangling reference) and starts
-without that dataset, which `/$/ping` does not notice.
+There are no linters. Testing happens in two places:
+
+- `test/smoke.sh IMAGE [DOCKER_RUN_OPTION...]` starts a container with a
+  fresh volume and checks that anonymous writes are refused (also on the
+  dataset URL itself), the union default graph, the requests dracor-api sends
+  (graph store PUT/DELETE, the corpus-drop update), and that data survives a
+  restart. It removes its container and volume again. Extend it when changing
+  `shiro.ini`, `config/` or the entrypoint.
+- The `docker build` itself: a build step starts `fuseki-server` with the
+  datasets from `config/` and curls `/$/ping` and `/dracor/query`, failing the
+  build if Fuseki does not come up or skips `/dracor`. Fuseki 6 exits on a
+  configuration file with a Turtle syntax error, but only logs an assembler
+  error (e.g. a dangling reference) and starts without that dataset, which
+  `/$/ping` does not notice.
 
 ## How the pieces fit together
 
@@ -87,6 +97,9 @@ without that dataset, which `/$/ping` does not notice.
   `linux/arm64`) and pushes to Docker Hub. It runs on a **published GitHub
   release** (or manual dispatch); image tags come from the release's semver
   tag (`X.Y.Z` and `X.Y`). Pushing to `main` does not publish.
+- `.github/workflows/test.yml` builds the image (amd64 only) and runs
+  `test/smoke.sh` as the default user and under `--user 12345:0`, on every PR
+  (including Dependabot's) and push to `main`.
 - Actions are pinned to commit SHAs with a version comment; Dependabot updates
   GitHub Actions monthly in grouped PRs. It ignores major versions of the
   `eclipse-temurin` base image: its major version is the Java version, which
