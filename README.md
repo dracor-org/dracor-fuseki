@@ -13,8 +13,9 @@ which is a [SPARQL 1.1](http://www.w3.org/TR/sparql11-overview/) server with a
 web interface, backed by the
 [Apache Jena TDB](https://jena.apache.org/documentation/tdb/) RDF triple store.
 
-The entrypoint for this image creates an empty dataset `/dracor` after starting
-the Fuseki server.
+The image comes with the dataset `/dracor`, which is configured in
+[config/dracor.ttl](config/dracor.ttl). Its default graph is the read-only
+union of all named graphs, so data has to be written to named graphs.
 
 The SPARQL query endpoints (`/dracor/sparql`, `/dracor/query`) and read-only
 graph access (`/dracor/get`) are open to anyone. Everything that modifies data
@@ -116,10 +117,6 @@ To restart a named container (it will remember the volume and port config)
 ### TDB2 and compaction
 
 The `/dracor` dataset uses [TDB2](https://jena.apache.org/documentation/tdb2/).
-TDB1, which is deprecated since Jena 6, can still be chosen with `-e TDB=1`:
-
-     docker run -p 3030:3030 -e TDB=1 dracor/fuseki
-
 TDB2 keeps old data on disk when graphs are replaced or deleted, so the
 database keeps growing until it is compacted:
 
@@ -138,7 +135,7 @@ volume `fuseki-data` as recommended above, do:
 ### Upgrading from 1.x
 
 Version 2 of this image updates Fuseki from 4.8 to 6.2, creates `/dracor` as
-TDB2, runs as an unprivileged user and restricts write access to the graph
+TDB2 with a union default graph, runs as an unprivileged user and restricts write access to the graph
 store. Start it with a new, empty `/fuseki` volume and load the data again:
 
 * The Fuseki 4 volume is owned by root and cannot be written by the
@@ -165,6 +162,12 @@ If you need to modify Fuseki's configuration further, you can use the equivalent
 and inspect `/fuseki` with the shell. Remember to restart fuseki afterwards:
 
     docker restart fuseki
+
+The dataset configurations in `/fuseki/configuration` that come with the image
+(`dracor.ttl`) are replaced on every start; other datasets added there are
+kept. Do not expose SPARQL Update or the read-write graph store on the dataset
+URL itself (as Fuseki's templates for new datasets do), as `shiro.ini` only
+protects the `update`, `data` and `upload` endpoints.
 
 ### Additional JARs on Fuseki classpath
 

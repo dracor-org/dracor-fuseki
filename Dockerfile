@@ -57,19 +57,27 @@ RUN     (curl --location --silent --show-error --fail --retry-connrefused --retr
         rm fuseki.tar.gz* && \
         cd $FUSEKI_HOME && chmod 755 fuseki-server
 
-# Test the install by testing it's ping resource. 20s sleep because Docker Hub.
-RUN $FUSEKI_HOME/fuseki-server & \
-    sleep 20 && \
-    curl -sS --fail 'http://localhost:3030/$/ping'
-
-# No need to kill Fuseki as our shell will exit after curl
-
 # As "localhost" is often inaccessible within Docker container,
 # we'll enable basic-auth with a random admin password
 # (which we'll generate on start-up)
 COPY shiro.ini $FUSEKI_HOME/shiro.ini
+# Dataset configurations, copied to $FUSEKI_BASE/configuration on start
+COPY config/ $FUSEKI_HOME/configuration/
 COPY entrypoint.sh /
 RUN chmod 755 /entrypoint.sh
+
+# Test the install and the dataset configurations: Fuseki skips a dataset
+# whose configuration it cannot build, but still answers the ping. 20s sleep
+# because Docker Hub. The databases are created in $FUSEKI_BASE, so remove it
+# in the same layer.
+RUN mkdir -p $FUSEKI_BASE/configuration && \
+    cp $FUSEKI_HOME/configuration/*.ttl $FUSEKI_BASE/configuration/ && \
+    { $FUSEKI_HOME/fuseki-server & } && \
+    sleep 20 && \
+    curl -sS --fail 'http://localhost:3030/$/ping' && \
+    curl -sS --fail -o /dev/null 'http://localhost:3030/dracor/query?query=ASK%7B%7D' && \
+    kill $! && { wait $! || true; } && \
+    rm -rf $FUSEKI_BASE
 
 WORKDIR $FUSEKI_HOME
 
