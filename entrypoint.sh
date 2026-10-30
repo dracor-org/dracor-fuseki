@@ -48,27 +48,18 @@ if [ -n "$ADMIN_PASSWORD" ] ; then
     mv "$FUSEKI_BASE/shiro.ini.$$" "$FUSEKI_BASE/shiro.ini"
 fi
 
+# Install the dataset configurations of the image on every start, so that
+# changes to them also reach an existing volume
+mkdir -p "$FUSEKI_BASE/configuration"
+cp "$FUSEKI_HOME"/configuration/*.ttl "$FUSEKI_BASE/configuration/"
+
 # fork
 exec "$@" &
-
-# TDB1 is deprecated since Jena 6, so TDB2 is the default
-TDB_VERSION=''
-if [ "${TDB}" = "1" ] ; then
-  TDB_VERSION='tdb'
-else
-  TDB_VERSION='tdb2'
-fi
 
 # Wait until server is up
 while [[ $(curl -I http://localhost:3030 2>/dev/null | head -n 1 | cut -d$' ' -f2) != '200' ]]; do
   sleep 1s
 done
-
-# Convert env to datasets
-curl -s 'http://localhost:3030/$/datasets'\
-  -H "Authorization: Basic $(echo -n admin:${ADMIN_PASSWORD} | base64)" \
-  -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8'\
-  --data "dbName=/dracor&dbType=${TDB_VERSION}"
 
 # Fuseki creates config.ttl and templates/* readable for their owner only;
 # give group 0 the same rights, so that the volume also works under another

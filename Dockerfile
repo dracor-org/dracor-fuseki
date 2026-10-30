@@ -68,6 +68,8 @@ RUN $FUSEKI_HOME/fuseki-server & \
 # we'll enable basic-auth with a random admin password
 # (which we'll generate on start-up)
 COPY shiro.ini $FUSEKI_HOME/shiro.ini
+# Dataset configurations, copied to $FUSEKI_BASE/configuration on start
+COPY config/ $FUSEKI_HOME/configuration/
 COPY entrypoint.sh /
 RUN chmod 755 /entrypoint.sh
 
