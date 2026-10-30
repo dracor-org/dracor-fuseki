@@ -16,6 +16,10 @@
 
 set -e
 
+# keep files created in $FUSEKI_BASE writable for group 0, so that the volume
+# also works under another user ID in group 0
+umask 0002
+
 if [ ! -f "$FUSEKI_BASE/shiro.ini" ] ; then
   # First time
   echo "###################################"
@@ -47,11 +51,12 @@ fi
 # fork
 exec "$@" &
 
+# TDB1 is deprecated since Jena 6, so TDB2 is the default
 TDB_VERSION=''
-if [ ! -z ${TDB+x} ] && [ "${TDB}" = "2" ] ; then
-  TDB_VERSION='tdb2'
-else
+if [ "${TDB}" = "1" ] ; then
   TDB_VERSION='tdb'
+else
+  TDB_VERSION='tdb2'
 fi
 
 # Wait until server is up
@@ -64,6 +69,11 @@ curl -s 'http://localhost:3030/$/datasets'\
   -H "Authorization: Basic $(echo -n admin:${ADMIN_PASSWORD} | base64)" \
   -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8'\
   --data "dbName=/dracor&dbType=${TDB_VERSION}"
+
+# Fuseki creates config.ttl and templates/* readable for their owner only;
+# give group 0 the same rights, so that the volume also works under another
+# user ID in group 0
+find "$FUSEKI_BASE" -user "$(id -u)" ! -type l -exec chmod g=u {} + || true
 
 # rejoin our exec
 wait
