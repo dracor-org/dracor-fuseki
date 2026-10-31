@@ -17,7 +17,6 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # amd64 only; the release workflow builds arm64 under QEMU, which is slow
       - name: Build image
         run: docker build -t dracor/fuseki:test .
 
@@ -26,3 +25,21 @@ jobs:
 
       - name: Smoke test under an arbitrary user ID in group 0
         run: test/smoke.sh dracor/fuseki:test --user 12345:0
+
+  # The release workflow builds arm64 under QEMU on an amd64 runner; do the
+  # same here (including the test step of the Dockerfile), without pushing
+  arm64:
+    name: Build the image for arm64 under QEMU
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Build image
+        run: docker buildx build --platform linux/arm64 .
