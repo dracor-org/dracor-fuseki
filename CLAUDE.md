@@ -97,9 +97,13 @@ There are no linters. Testing happens in two places:
   `linux/arm64`) and pushes to Docker Hub. It runs on a **published GitHub
   release** (or manual dispatch); image tags come from the release's semver
   tag (`X.Y.Z` and `X.Y`). Pushing to `main` does not publish.
-- `.github/workflows/test.yml` builds the image (amd64 only) and runs
+- `.github/workflows/test.yml` builds the image (amd64) and runs
   `test/smoke.sh` as the default user and under `--user 12345:0`, on every PR
-  (including Dependabot's) and push to `main`.
+  (including Dependabot's) and push to `main`. A second job builds arm64 under
+  QEMU like the release workflow, which also runs the Dockerfile's test step
+  emulated. Locally, Docker Desktop's amd64 emulation on Apple silicon fails
+  at `tar` in the Ubuntu 26.04 base image (ENOSYS when extracting into
+  subdirectories), so cross-platform builds can only be checked in CI.
 - Actions are pinned to commit SHAs with a version comment; Dependabot updates
   GitHub Actions monthly in grouped PRs. It ignores major versions of the
   `eclipse-temurin` base image: its major version is the Java version, which

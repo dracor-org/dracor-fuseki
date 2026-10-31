@@ -67,13 +67,17 @@ COPY entrypoint.sh /
 RUN chmod 755 /entrypoint.sh
 
 # Test the install and the dataset configurations: Fuseki skips a dataset
-# whose configuration it cannot build, but still answers the ping. 20s sleep
-# because Docker Hub. The databases are created in $FUSEKI_BASE, so remove it
-# in the same layer.
+# whose configuration it cannot build, but still answers the ping. Wait up to
+# 2 minutes, as Fuseki starts slowly when another platform is emulated with
+# QEMU. The databases are created in $FUSEKI_BASE, so remove it in the same
+# layer.
 RUN mkdir -p $FUSEKI_BASE/configuration && \
     cp $FUSEKI_HOME/configuration/*.ttl $FUSEKI_BASE/configuration/ && \
     { $FUSEKI_HOME/fuseki-server & } && \
-    sleep 20 && \
+    for i in $(seq 1 120); do \
+      curl -s --fail -o /dev/null 'http://localhost:3030/$/ping' && break; \
+      sleep 1; \
+    done && \
     curl -sS --fail 'http://localhost:3030/$/ping' && \
     curl -sS --fail -o /dev/null 'http://localhost:3030/dracor/query?query=ASK%7B%7D' && \
     kill $! && { wait $! || true; } && \
