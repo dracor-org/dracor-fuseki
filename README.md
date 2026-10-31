@@ -141,23 +141,22 @@ volume `fuseki-data` as recommended above, do:
 ### Upgrading from 1.x
 
 Version 2 of this image updates Fuseki from 4.8 to 6.2, creates `/dracor` as
-TDB2 with a union default graph, runs as an unprivileged user and restricts write access to the graph
-store. Start it with a new, empty `/fuseki` volume and load the data again:
+TDB2 with a union default graph, runs as an unprivileged user and requires the
+`admin` user for all writes. It needs a new, empty `/fuseki` volume, into which
+the data has to be loaded again. A 1.x volume cannot be reused:
 
-* The Fuseki 4 volume is owned by root and cannot be written by the
-  unprivileged user.
+* 1.x created `/dracor` as TDB1, while version 2 opens the same directory as
+  TDB2. Fuseki starts without an error, but the dataset appears empty.
+* The 1.x volume is owned by root and cannot be written by the unprivileged
+  user.
 * `shiro.ini` is only copied to `/fuseki` on the first start, so an old
   volume keeps the old access rules, which let anyone write to
   `/dracor/data`.
-* Jena recommends reloading data written by older versions (language tags
-  are case-insensitive since Jena 5, and data should be reloaded into TDB2).
 
-If you nevertheless keep an old volume, fix its permissions first and add the
-`/*/data/**` and `/*/upload/**` rules from this repository's `shiro.ini` to
-`/fuseki/shiro.ini`:
-
-    docker run --rm --user 0 --volumes-from fuseki-data --entrypoint sh dracor/fuseki \
-      -c 'chown -R 1001:0 /fuseki && chmod -R g=u /fuseki'
+Writing to `/dracor` requires a version of
+[dracor-api](https://github.com/dracor-org/dracor-api) that sends the admin
+password (`FUSEKI_SECRET`) and writes each play to a named graph
+([dracor-api#410](https://github.com/dracor-org/dracor-api/pull/410)).
 
 ## Customizing Fuseki configuration
 
